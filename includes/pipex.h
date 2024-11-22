@@ -10,5 +10,8 @@
 # include "libft.h"
 # include <stdio.h>
 # include <limits.h>
+# include <sys/types.h>
+# include <sys/wait.h>
+# include <fcntl.h>
 
 #endif // PIPEX_H

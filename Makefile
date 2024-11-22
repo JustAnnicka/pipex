@@ -31,7 +31,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 
 $(NAME): $(LIBFT) $(OBJ_FILES) 
 	@echo "\033[0;34mLinking $@\033[0m"
-	@$(CC) $(CFLAGS) $(OBJ_FILES) $(LIBS) $(INCLUDES) -o $(BUILD_DIR)/$(NAME) $(LIBFT)
+	@$(CC) $(CFLAGS) $(OBJ_FILES) $(LIBS) $(INCLUDES) -o $(NAME) $(LIBFT)
 	@echo "\033[0;33mFinished building $@\033[0m"
 
 $(LIBFT):
@@ -46,6 +46,7 @@ fclean: clean
 	@echo "\033[0;31mDeleting $(BUILD_DIR)\033[0m"
 	@make -C lib/libft/ fclean
 	@rm -rf $(BUILD_DIR)
+	@rm -f $(NAME)
 
 re: fclean all
 

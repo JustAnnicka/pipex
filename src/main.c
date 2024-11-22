@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:23:57 by aehrl             #+#    #+#             */
-/*   Updated: 2024/11/20 17:51:55 by aehrl            ###   ########.fr       */
+/*   Updated: 2024/11/22 15:42:28 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,15 +17,6 @@ MUST TAKE 4 ARGUMENTS
 -> ./pipex file1 cmd1 cmd2 file2
 --> file1 and file2 are file names.
 --> cmd1 and cmd2 are shell commands with their parameters.
-
-You have to turn in a Makefile which will compile your source files. It must 
-not relink.
-• You have to handle errors thoroughly. In no way your program should quit
-unexpectedly (segmentation fault, bus error, double free, and so forth).
-• Your program mustn’t have memory leaks.
-• If you have any doubt, handle the errors like the shell command:
-< file1 cmd1 | cmd2 > file2
-
 
 Bonus part
 You will get extra points if you:
@@ -52,41 +43,27 @@ ERROR HANDLING:
 -> No Limiter (bonus)
 -> no output file 
 
-
-STEPS TO TAKE
--> Check # of argc
--> get all cmds in listed and save the (FT_Split)
--> When using here_doc (bonus) the second cmd is not a file
-
 RANDOM STUFF
 STDIN IS FD 0
 STDOUT IS FD 1
 
-POOSIBLE WAY TO DO THIS
-create a structture that hold a matrix with following data
--> **char of a copy of the content of the inputfile
--> *char[] of the argv (maybe newarg with only the cmnds)
-	-> in case of newargv use *char for the outputfile
-	-> in case of newargv use a bool to determine here_doc
-	-> in case of newargc use a *char to store LIMITER
--> PID (also ParentPID?)
--> Int array with (maybe List type as we can add to this or calloc allocated by cmd count)
-	-> Read end
-	-> Write end
+start by doing an open to get fd of infile
+make sure we can write to outfile or create it (Open with create flag) with correct permissions
+then we can fork, dup2, and pipe
+we need the cmnds to be split into an array so that each flag is its own string that can be checked by excev
+finally we excev the programm
 */
 int	ft_access_rights(char *inputfile, char *outputfile)
 {
-	int	fd;
-
-	fd = access(inputfile, R_OK);
-	if (fd < 0)
-		perror("Input file error\nDescription");
-	fd = access(outputfile, W_OK);
-	if (fd < 0 && errno != 2)
-		perror("Output file error\nDescription");
-	if (errno == 2)
-		fd = 0;
-	return (fd);
+	int	x;
+	
+	x = access(outputfile, W_OK);
+	if (x < 0 && errno != 2)
+		return (perror("Output file error\nDescription"), -1);
+	x = access(inputfile, R_OK);
+	if (x < 0)
+		return (perror("Input file error\nDescription"), -1);
+	return (x);
 }
 
 /* int	ft_pipes(char **argv)
@@ -103,21 +80,43 @@ int	ft_access_rights(char *inputfile, char *outputfile)
 
 int	main(int argc, char *argv[])
 {
-	//static char	**newargv;
+	char	**cmnd;
+	int		count;
+	int		fd_in;
+	int		fd_out;
+	pid_t pid;
 
+	count = 2;
+	fd_in = 0;
+	fd_out = 1;
 	if (argc < 5)
 		return (argv = NULL, ft_printf("Wrong argument count"), -1);
-	if (ft_access_rights(argv[1], argv[argc - 1]) < 0)
+	if (ft_strncmp(argv[count - 1], "here_doc", ft_strlen(argv[count])) == 0)
+		count++;
+	if (count == 2 && (ft_access_rights(argv[count - 1], argv[argc - 1]) < 0))
 		return (argv = NULL, -1);
-	printf("argv: %s", argv[0]);
-	//printf("\nSTDIN: %d", STDIN);
-/* 	newargv = ft_calloc(argc, sizeof (char**));
-	if (!newargv)
-		return (-1);
-	while (--argc > 0)
-		newargv[argc - 1] = argv[argc];
-	while (newargv[argc++] != NULL) 
-		printf("\nnewargv: %s", newargv[argc - 1]); */
+	if (count == 2)
+		fd_in = open(argv[count - 1], O_RDONLY | O_CLOEXEC);
+	fd_out = open(argv[argc - 1], O_RDWR | O_CREAT | O_CLOEXEC,  S_IRWXU);
+	ft_printf("fd in: %d  fd out: %d\n", fd_in, fd_out);
+	while (count < argc - 1)
+	{
+		int i = 0;
+		cmnd = ft_split(argv[count], '-');
+		while(cmnd[i])
+		{
+			ft_printf("cmnd[%d]: %s\n", i, cmnd[i]);
+			i++;
+		}
+		//maybe free cmnd
+	//	execve(argv[0], cmnd, NULL);
+		count++;
+	}
+	pid = fork();
+	if (pid < 0)
+		return (ft_printf("fork error"), perror("Output file error\nDescription"), -1); 
+	//waitpid(pid);
+	ft_printf("pid: %d\n", pid);
 	/*execve(argv[0], argv, NULL);
 	perror("execve");
 	exit(EXIT_FAILURE); */
