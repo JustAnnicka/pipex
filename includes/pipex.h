@@ -14,4 +14,7 @@
 # include <sys/wait.h>
 # include <fcntl.h>
 
+char **ft_get_environment(char **envp);
+char *ft_get_path(char **envp, char *cmnd);
+
 #endif // PIPEX_H

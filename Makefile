@@ -4,7 +4,7 @@ CFLAGS = -Wall -Wextra -Werror -DM
 
 NAME = pipex
 SRC_DIR = src
-SRC = main.c 
+SRC = main.c utils.c
 BUILD_DIR = build
 INCLUDE_DIR = includes
 INCLUDES = -I./$(INCLUDE_DIR)

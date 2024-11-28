@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:23:57 by aehrl             #+#    #+#             */
-/*   Updated: 2024/11/22 15:42:28 by aehrl            ###   ########.fr       */
+/*   Updated: 2024/11/28 16:35:04 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,19 +39,9 @@ ERROR HANDLING:
 -> less than 4 arguments [DONE]
 -> No input file (manditory) [DONE]
 -> Check read permissions input [DONE]
--> Check write permissions output file
+-> Check write permissions output file [DONE]
 -> No Limiter (bonus)
--> no output file 
-
-RANDOM STUFF
-STDIN IS FD 0
-STDOUT IS FD 1
-
-start by doing an open to get fd of infile
-make sure we can write to outfile or create it (Open with create flag) with correct permissions
-then we can fork, dup2, and pipe
-we need the cmnds to be split into an array so that each flag is its own string that can be checked by excev
-finally we excev the programm
+-> no output file [DONE]
 */
 int	ft_access_rights(char *inputfile, char *outputfile)
 {
@@ -66,59 +56,158 @@ int	ft_access_rights(char *inputfile, char *outputfile)
 	return (x);
 }
 
-/* int	ft_pipes(char **argv)
+/* int	ft_pipes(char *cmd, int fd_in, int fd_out, int is_last)
 {
-	//CREATE ***MATRIX TO STORE READ AND WRITE ENDS OF PIPES OF THE WHOLE CMNDS?
-	//int pipe(int pipefd[2]);
+	int			pipefd[2];
+	pid_t		pid;
 
+	if (!is_last && pipe(pipefd) < 0) {
+        perror("Error creating pipe");
+        return -1;
+    }
+	pid = fork();
+    if (pid < 0) {
+        perror("Error forking process");
+        return -1;
+    }
+	if (pid == 0)
+	{
+		if (fd_in != STDIN_FILENO) {
+			dup2(fd_in, STDIN_FILENO);
+			close(fd_in);
+		}
+		if (is_last) {
+			dup2(fd_out, STDOUT_FILENO);
+		} else {
+			dup2(pipefd[1], STDOUT_FILENO);
+		}
+		if (!is_last) {
+			close(pipefd[0]);
+			close(pipefd[1]);
+		}
+		close(fd_out);
+		char **cmd_args = ft_split(cmd, ' ');
+		if (execve(cmd_args[0], cmd_args, NULL) < 0) {
+			perror("Error executing command");
+			exit(1);
+		}
+		if (fd_in != STDIN_FILENO) close(fd_in); 
+		if (!is_last)
+		{
+			close(pipefd[1]);
+			fd_in = pipefd[0];
+		}
+	}
+	waitpid(pid, NULL, 0);
+	return (is_last ? 0 : fd_in);
 } */
-
-/* int	ft_forks(char **argv)
+int	ft_child(char **cmnd, int fds[], int pipefd[], char *envp[])
 {
-	pid_t fork(void);
-} */
+	if (fds[0] != STDIN_FILENO)
+	{
+		dup2(fds[0], STDIN_FILENO);
+		close(fds[0]);
+	}
+	dup2(pipefd[1], STDOUT_FILENO);
+	close(pipefd[0]);
+	close(pipefd[1]);
+	close(fds[1]);
+	if (execve(ft_get_path(envp, cmnd[0]), cmnd, envp) < 0) 
+	{
+			perror("Error executing command");
+			exit(1);
+	}
+	if (fds[0] != STDIN_FILENO)
+		close(fds[0]); 
+	close(pipefd[1]);
+	fds[0] = pipefd[0];
+	return (0);
+}
 
-int	main(int argc, char *argv[])
+int ft_pipes(char *cmnd, int fds[], char *envp[])
 {
-	char	**cmnd;
+	pid_t	pid;
+	int		pipefd[2];
+	char	**cmd;
+
+	cmd = ft_split(cmnd, ' ');
+	if (pipe(pipefd) < 0)
+	{
+        perror("Error creating pipe");
+        return (-1);
+    }
+	pid = fork();
+	if (pid < 0) 
+	{
+		perror("Error forking process");
+		return (-1);
+	}
+	if (pid == 0)
+		ft_child(cmd, fds, pipefd, envp);
+	waitpid(pid, NULL, 0);
+	return (fds[0]);
+}
+
+/* int	main(int argc, char *argv[])
+{
 	int		count;
 	int		fd_in;
 	int		fd_out;
-	pid_t pid;
-
+	int		fd_temp;
+	int		is_last;
+	
 	count = 2;
 	fd_in = 0;
 	fd_out = 1;
 	if (argc < 5)
 		return (argv = NULL, ft_printf("Wrong argument count"), -1);
-	if (ft_strncmp(argv[count - 1], "here_doc", ft_strlen(argv[count])) == 0)
+	if (ft_strncmp(argv[count - 1], "here_doc", ft_strlen(argv[count - 1])) == 0)
 		count++;
 	if (count == 2 && (ft_access_rights(argv[count - 1], argv[argc - 1]) < 0))
 		return (argv = NULL, -1);
 	if (count == 2)
 		fd_in = open(argv[count - 1], O_RDONLY | O_CLOEXEC);
 	fd_out = open(argv[argc - 1], O_RDWR | O_CREAT | O_CLOEXEC,  S_IRWXU);
-	ft_printf("fd in: %d  fd out: %d\n", fd_in, fd_out);
 	while (count < argc - 1)
 	{
-		int i = 0;
-		cmnd = ft_split(argv[count], '-');
-		while(cmnd[i])
+		is_last = (count == argc - 2);
+		fd_temp = ft_pipes(argv[count], fd_in, fd_out, is_last);
+		if (fd_temp < 0)
 		{
-			ft_printf("cmnd[%d]: %s\n", i, cmnd[i]);
-			i++;
+			close(fd_out);
+			return (1);
 		}
-		//maybe free cmnd
-	//	execve(argv[0], cmnd, NULL);
+		fd_in = fd_temp;
 		count++;
 	}
-	pid = fork();
-	if (pid < 0)
-		return (ft_printf("fork error"), perror("Output file error\nDescription"), -1); 
-	//waitpid(pid);
-	ft_printf("pid: %d\n", pid);
-	/*execve(argv[0], argv, NULL);
-	perror("execve");
-	exit(EXIT_FAILURE); */
+	close(fd_out);
+	return (0);
+} */
+int	main(int argc, char *argv[], char *envp[])
+{
+	int		count;
+	int		fds[2];
+	int		fd_temp;
+	
+	count = 2;
+	if (argc < 5)
+		return (argv = NULL, ft_printf("Wrong argument count"), -1);
+	if (ft_strncmp(argv[count - 1], "here_doc", ft_strlen(argv[count - 1])) == 0)
+		count++;
+	if (count == 2 && (ft_access_rights(argv[count - 1], argv[argc - 1]) < 0))
+		return (argv = NULL, -1);
+	if (count == 2)
+		fds[0] = open(argv[count - 1], O_RDONLY | O_CLOEXEC);
+	fds[1] = open(argv[argc - 1], O_RDWR | O_CREAT | O_CLOEXEC ,  S_IRWXU);
+	envp = ft_get_environment(envp);
+	while (count < argc - 1)
+	{
+		fd_temp = ft_pipes(argv[count], fds, envp);
+		count++;
+		fds[1] = fd_temp;
+		//fd_in = fd_temp;
+	/* 	if (count == argc -1)
+			ft_last_pipe(); */
+	}
 	return (0);
 }
