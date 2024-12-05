@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:23:57 by aehrl             #+#    #+#             */
-/*   Updated: 2024/11/29 15:30:43 by aehrl            ###   ########.fr       */
+/*   Updated: 2024/12/05 17:45:19 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,23 +126,25 @@ int	ft_child(char **cmnd, int fds[], int pipefd[], char *envp[])
 
 int	ft_last_process(char **cmnd, int fds[], char *envp[])
 {
-	ft_printf("fd_out:%d\n", fds[1]);
+	//ft_printf("fd_out:%d\n", fds[1]);
 	//dup2(fds[1], STDOUT_FILENO);
-	if (dup2(fds[1], STDOUT_FILENO) < 0)
+	if (dup2(fds[1], fds[2]) < 0)
 	{
 		perror("dup2 failed");
-		//exit(1);
+		exit(1);
 	}
-	ft_printf("after dup2: fd_out:%d\n", fds[1]);
-	ft_printf("after dup2: cmnd:%s\n", cmnd[1]);
-	ft_printf("after dup2: envp:%s\n", envp[1]);
-	 /* if (execve(ft_get_path(envp, cmnd[0]), cmnd, envp) < 0) 
+	/* fprintf(stderr, "after dup2: fd_out:%d\n", fds[1]);
+	fprintf(stderr,"after dup2: cmnd:%s\n", cmnd[1]); */
+	//write(STDOUT_FILENO, "HELLO", 5);
+	char *path = ft_get_path(envp, cmnd[0]);
+	if (execve(path, cmnd, envp) < 0) 
 	{
 			perror("Error executing command");
 			exit(1);
-	} */
-	/*if (fds[0] != STDIN_FILENO)
-		close(fds[0]);  */
+	}
+	fprintf(stderr, "path:%s\n", ft_get_path(envp, cmnd[0]));
+	if (fds[0] != STDIN_FILENO)
+		close(fds[0]); 
 	return (0);
 }
 
@@ -176,7 +178,7 @@ int ft_pipes(char *cmnd, int fds[], char *envp[], int is_last)
     }
 	ft_printf("fd_out:%d\n", fds[1]);
 	close(fds[1]);
-	ft_printf("STDOUT:%d\n",  STDOUT_FILENO);
+	//ft_printf("STDOUT:%d\n",  STDOUT_FILENO);
 	waitpid(pid, NULL, 0);
 	if (is_last == 1)
 		return (-1);
@@ -222,7 +224,7 @@ int ft_pipes(char *cmnd, int fds[], char *envp[], int is_last)
 int	main(int argc, char *argv[], char *envp[])
 {
 	int		count;
-	int		fds[2];
+	int		fds[3];
 	int		fd_temp;
 	int		is_last;
 	
@@ -236,7 +238,9 @@ int	main(int argc, char *argv[], char *envp[])
 		return (argv = NULL, -1);
 	if (count == 2)
 		fds[0] = open(argv[count - 1], O_RDONLY | O_CLOEXEC);
-	fds[1] = open(argv[argc - 1], O_RDWR | O_CREAT | O_CLOEXEC ,  S_IRWXU);
+	fds[2] = open(argv[argc - 1], O_RDWR | O_CREAT | O_CLOEXEC ,  S_IRWXU);
+	ft_printf("output fd:%d\n", fds[2]);
+	fds[1] = STDOUT_FILENO;
 	envp = ft_get_environment(envp);
 	while (count < argc - 1)
 	{
