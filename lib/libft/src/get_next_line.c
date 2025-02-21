@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 15:48:26 by aehrl             #+#    #+#             */
-/*   Updated: 2024/10/23 12:56:42 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/19 19:02:54 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,7 +21,7 @@ static char	*ft_read(int fd, char *buffer)
 	temp = ft_gnl_calloc((BUFFER_SIZE + 2), sizeof(char));
 	if (!temp)
 		return (NULL);
-	while (bytes_read != 0 && !ft_strchr(temp, '\n'))
+	while (bytes_read != 0 && !ft_gnl_strchr(temp, '\n'))
 	{
 		bytes_read = read(fd, temp, BUFFER_SIZE);
 		if (bytes_read >= 0)

@@ -6,13 +6,13 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 15:49:58 by aehrl             #+#    #+#             */
-/*   Updated: 2024/10/28 18:48:03 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/19 19:02:23 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "get_next_line.h"
 
-char	*ft_strchr(const char *s, int c)
+char	*ft_gnl_strchr(const char *s, int c)
 {
 	char	x;
 	char	*src;

@@ -1,10 +1,11 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -DM
+CFLAGS = -Wall -Wextra -Werror -DM #-fsanitize=address
 
 NAME = pipex
 SRC_DIR = src
 SRC = main.c utils.c
+SRC_B = main_bonus.c utils.c utils_bonus.c
 BUILD_DIR = build
 INCLUDE_DIR = includes
 INCLUDES = -I./$(INCLUDE_DIR)
@@ -15,10 +16,17 @@ LIBFT = lib/libft/libft.a
 
 # Do not change these
 SRC_FILES = $(addprefix $(SRC_DIR)/, $(SRC))
+SRC_B_FILES = $(addprefix $(SRC_DIR)/, $(SRC_B))
 OBJ_DIR = $(BUILD_DIR)/obj
 OBJ = $(SRC:.c=.o)
 OBJ_FILES = $(addprefix $(OBJ_DIR)/, $(OBJ))
+OBJ_B = $(SRC_B:.c=.o)
+OBJ_B_FILES = $(addprefix $(OBJ_DIR)/, $(OBJ_B))
 
+COLOUR_GREEN=\033[0;32m
+COLOUR_RED=\033[0;31m
+COLOUR_BLUE=\033[0;34m
+COLOUR_END=\033[0m
 
 all: $(NAME)
 
@@ -37,6 +45,10 @@ $(NAME): $(LIBFT) $(OBJ_FILES)
 $(LIBFT):
 	@make -C lib/libft/
 
+bonus: $(LIBFT) $(OBJ_B_FILES)
+	@echo "\033[0;34mLinking $@\033[0m"
+	@$(CC) $(CFLAGS) $(OBJ_B_FILES) $(LIBS) $(INCLUDES) -o $(NAME) $(LIBFT)
+	@echo "$(COLOUR_GREEN)🔥 🔥 Compliling Everything ✅ ✅$(COLOUR_END)"
 clean:
 	@echo "\033[0;31mDeleting $(OBJ_DIR)\033[0m"
 	@make -C lib/libft/ clean
