@@ -4,8 +4,8 @@ CFLAGS = -Wall -Wextra -Werror -DM #-fsanitize=address
 
 NAME = pipex
 SRC_DIR = src
-SRC = main.c utils.c
-SRC_B = main_bonus.c utils.c utils_bonus.c
+SRC = main.c utils.c pipes.c
+SRC_B = main_bonus.c utils.c pipes.c utils_bonus.c
 BUILD_DIR = build
 INCLUDE_DIR = includes
 INCLUDES = -I./$(INCLUDE_DIR)

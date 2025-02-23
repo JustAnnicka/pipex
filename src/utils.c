@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 17:05:05 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/18 19:47:32 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/23 20:15:14 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,16 +65,7 @@ char *ft_get_path(char **envp, char *cmnd)
 		free(path);
 		i++;
 	}
-	error_pipex('p');
+	ft_putstr_fd("Error path not found\n", 1);
 	return (NULL);
 }
-// ADD ERRORS FUNCTION - WITH ft_putstring_fd function
-void error_pipex(char c)
-{
-	ft_putstr_fd("Error\n", 1);
-	if (c == 'a')
-		ft_printf("Usage: infile cmd1 cmd2 ... outfile\n");
-	if (c == 'p')
-		ft_putstr_fd("Error path not found\n", 1);
 
-}
