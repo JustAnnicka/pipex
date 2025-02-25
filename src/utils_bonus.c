@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/18 19:26:57 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/23 20:33:53 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/25 18:35:36 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ int	get_first_arg(char *argv[])
 	int	i;
 
 	i = 0;
-	while(ft_strncmp(argv[i], "./pipex", ft_strlen(argv[i])) != 0)
+	while (ft_strncmp(argv[i], "./pipex", ft_strlen(argv[i])) != 0)
 		i++;
 	i++;
 	return (i);
@@ -26,11 +26,11 @@ int	get_first_arg(char *argv[])
 int	ft_access_rights_bonus(char *inputfile, char *outputfile)
 {
 	int	x;
-	
+
 	x = access(outputfile, W_OK);
 	if (x < 0 && errno != 2)
 		return (perror("Error\nOutput file\nDescription"), -1);
-	else if(x < 0 && errno == 2)
+	else if (x < 0 && errno == 2)
 		x = 0;
 	if (ft_strncmp(inputfile, "here_doc", ft_strlen(inputfile) != 0))
 	{
@@ -38,16 +38,16 @@ int	ft_access_rights_bonus(char *inputfile, char *outputfile)
 		if (x < 0)
 			return (perror("Error\nInput file\nDescription"), -1);
 	}
-	else 
+	else
 		open(inputfile, O_RDWR | O_CREAT, S_IRWXU);
 	return (x);
 }
 
-void read_input_limiter(int i, char *argv[])
+void	read_input_limiter(int i, char *argv[])
 {
-	char *input;
-	int	delimiter;
-	int	fd;	
+	char	*input;
+	int		delimiter;
+	int		fd;
 
 	delimiter = 1;
 	fd = open(argv[i], O_RDWR, S_IRWXU);
@@ -63,10 +63,11 @@ void read_input_limiter(int i, char *argv[])
 		else
 			break ;
 	}
-	free (input);
+	free(input);
 	close(fd);
 }
-void del_heredoc(char *argv[])
+
+void	del_heredoc(char *argv[])
 {
 	int	i;
 

@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:23:57 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/23 20:22:14 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/25 18:35:06 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ int	main(int argc, char *argv[], char *envp[])
 		return (argv = NULL, -1);
 	fds[0] = open(argv[first_last[0] - 1], O_RDONLY);
 	fds[1] = open(argv[argc - 1], O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
-	first_last[1]= 0;
+	first_last[1] = 0;
 	envp = ft_get_environment(envp);
 	while (first_last[0] < argc - 1)
 	{

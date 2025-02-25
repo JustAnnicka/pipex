@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/23 20:17:08 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/23 20:17:27 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/25 18:33:17 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ int	ft_child_process(char **cmd, int fds[], int pipefd[], char *envp[])
 			exit(1);
 		}
 		close(fds[0]);
+		unlink("here_doc");
 	}
 	dup2(pipefd[1], STDOUT_FILENO);
 	close(pipefd[0]);

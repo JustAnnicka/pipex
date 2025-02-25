@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/22 15:48:26 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/19 19:02:54 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/25 18:36:17 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ char	*ft_extract_line(char *buffer)
 
 char	*ft_update_bufffer(char *buffer)
 {
-	char	*temp_string;
+	char	*temp;
 	int		start;
 	int		i;
 
@@ -77,14 +77,14 @@ char	*ft_update_bufffer(char *buffer)
 		start++;
 	if (!buffer[start])
 		return (free(buffer), NULL);
-	temp_string = ft_gnl_calloc((ft_gnl_strlen(buffer) - start + 1), sizeof(char));
-	if (!temp_string)
+	temp = ft_gnl_calloc((ft_gnl_strlen(buffer) - start + 1), sizeof(char));
+	if (!temp)
 		return (NULL);
 	start++;
 	while (buffer[start] && buffer[start] != '\0')
-		temp_string[i++] = buffer[start++];
+		temp[i++] = buffer[start++];
 	free(buffer);
-	return (temp_string);
+	return (temp);
 }
 
 char	*get_next_line(int fd)

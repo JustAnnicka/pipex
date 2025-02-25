@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/15 18:23:57 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/23 20:33:33 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/02/25 18:33:15 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@ int	main(int argc, char *argv[], char *envp[])
 		read_input_limiter(f_l[0], argv);
 	fds[0] = open(argv[f_l[0]], O_RDONLY);
 	if (ft_strncmp(argv[f_l[0]], "here_doc", ft_strlen(argv[f_l[0]])) == 0)
-		f_l[0] = f_l[0] + 2;
+		f_l[0] = f_l[0] + 1;
 	fds[1] = open(argv[argc - 1], O_RDWR | O_CREAT | O_TRUNC, S_IRWXU);
 	f_l[1] = 0;
 	envp = ft_get_environment(envp);
@@ -36,7 +36,7 @@ int	main(int argc, char *argv[], char *envp[])
 			f_l[1] = 1;
 		if (ft_pipes(argv[f_l[0]], fds, envp, f_l) < 0)
 			return (close(fds[0]), close(fds[1]), 1);
+		del_heredoc(argv);
 	}
-	del_heredoc(argv);
 	return (free_matrix(envp), close(fds[0]), close(fds[1]), 0);
 }
