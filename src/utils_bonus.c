@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/18 19:26:57 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/25 18:35:36 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/03/19 16:37:53 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,43 +25,50 @@ int	get_first_arg(char *argv[])
 
 int	ft_access_rights_bonus(char *inputfile, char *outputfile)
 {
-	int	x;
+	int	i;
+	int	o;
 
-	x = access(outputfile, W_OK);
-	if (x < 0 && errno != 2)
-		return (perror("Error\nOutput file\nDescription"), -1);
-	else if (x < 0 && errno == 2)
-		x = 0;
 	if (ft_strncmp(inputfile, "here_doc", ft_strlen(inputfile) != 0))
 	{
-		x = access(inputfile, R_OK);
-		if (x < 0)
-			return (perror("Error\nInput file\nDescription"), -1);
+		i = access(inputfile, R_OK);
+		if (i < 0)
+			ft_err_msg(errno, NULL);
 	}
 	else
 		open(inputfile, O_RDWR | O_CREAT, S_IRWXU);
-	return (x);
+	o = access(outputfile, W_OK);
+	if (o < 0 && (errno != 2 || ft_strlen(outputfile) == 0))
+		ft_err_msg(errno, NULL);
+	else if (errno == 2 && ft_strlen(outputfile) > 0)
+		o = 0;
+	if (i < 0 || o < 0)
+		return (-1);
+	return (0);
 }
 
 void	read_input_limiter(int i, char *argv[])
 {
 	char	*input;
-	int		delimiter;
 	int		fd;
 
-	delimiter = 1;
 	fd = open(argv[i], O_RDWR, S_IRWXU);
-	while (delimiter == 1)
+	while (1)
 	{
-		input = get_next_line(1);
-		if (ft_strlen(input) - 1 != ft_strlen(argv[i + 1]))
+		write(1, "here_doc> ", 10);
+		input = get_next_line(0);
+		if (input && ft_strlen(input) - 1 != ft_strlen(argv[i + 1]))
 			ft_putstr_fd(input, fd);
-		else if (ft_strncmp(input, argv[i + 1], ft_strlen(argv[i + 1])) != 0)
-		{
+		else if (input
+			&& ft_strncmp(input, argv[i + 1], ft_strlen(argv[i + 1])) != 0)
 			ft_putstr_fd(input, fd);
-		}
 		else
 			break ;
+		free(input);
+	}
+	if (!input)
+	{
+		unlink("here_doc");
+		exit(2);
 	}
 	free(input);
 	close(fd);

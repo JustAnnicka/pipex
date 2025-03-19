@@ -1,6 +1,6 @@
 
 CC = gcc
-CFLAGS = -Wall -Wextra -Werror -DM #-fsanitize=address
+CFLAGS = -Wall -Wextra -Werror #-fsanitize=address
 
 NAME = pipex
 SRC_DIR = src
@@ -38,7 +38,7 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 $(NAME): $(LIBFT) $(OBJ_FILES) 
-	@echo "\033[0;34mLinking $@\033[0m"
+	@echo "\033[0;34mCreating $@\033[0m"
 	@$(CC) $(CFLAGS) $(OBJ_FILES) $(LIBS) $(INCLUDES) -o $(NAME) $(LIBFT)
 	@echo "\033[0;33mFinished building $@\033[0m"
 
@@ -46,7 +46,7 @@ $(LIBFT):
 	@make -C lib/libft/
 
 bonus: $(LIBFT) $(OBJ_B_FILES)
-	@echo "\033[0;34mLinking $@\033[0m"
+	@echo "\033[0;34mCreating $@\033[0m"
 	@$(CC) $(CFLAGS) $(OBJ_B_FILES) $(LIBS) $(INCLUDES) -o $(NAME) $(LIBFT)
 	@echo "$(COLOUR_GREEN)🔥 🔥 Compliling Everything ✅ ✅$(COLOUR_END)"
 clean:

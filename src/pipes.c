@@ -6,43 +6,33 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/23 20:17:08 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/25 18:33:17 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/03/19 15:40:03 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "pipex.h"
 
-int	ft_first_process(char **cmd, int fds[], int pipefd[], char *envp[])
+void	ft_first_process(char **cmd, int fds[], int pipefd[], char *envp[])
 {
 	if (fds[0] != STDIN_FILENO)
 	{
 		if (dup2(fds[0], STDIN_FILENO) < 0)
-		{
-			perror("Error redirecting input");
-			exit(1);
-		}
+			exit(errno);
 		close(fds[0]);
 	}
 	dup2(pipefd[1], STDOUT_FILENO);
 	close(fds[0]);
 	close(fds[1]);
 	if (execve(ft_get_path(envp, cmd[0]), cmd, envp) < 0)
-	{
-		perror("Error\nexecuting command");
-		exit(1);
-	}
-	return (-1);
+		exit(errno);
 }
 
-int	ft_child_process(char **cmd, int fds[], int pipefd[], char *envp[])
+void	ft_child_process(char **cmd, int fds[], int pipefd[], char *envp[])
 {
 	if (fds[0] != STDIN_FILENO)
 	{
 		if (dup2(fds[0], STDIN_FILENO) < 0)
-		{
-			perror("Error\nredirecting input");
-			exit(1);
-		}
+			exit(errno);
 		close(fds[0]);
 		unlink("here_doc");
 	}
@@ -50,32 +40,27 @@ int	ft_child_process(char **cmd, int fds[], int pipefd[], char *envp[])
 	close(pipefd[0]);
 	close(pipefd[1]);
 	if (execve(ft_get_path(envp, cmd[0]), cmd, envp) < 0)
-	{
-		perror("Error\nexecuting command");
-		exit(1);
-	}
-	return (-1);
+		exit(errno);
 }
 
-int	ft_last_process(char **cmd, int fds[], char *envp[])
+void	ft_last_process(char **cmd, int fds[], char *envp[])
 {
 	if (fds[0] != STDIN_FILENO)
 	{
 		if (dup2(fds[0], STDIN_FILENO) < 0)
-		{
-			perror("Error\nredirecing input");
-			exit(1);
-		}
+			exit(errno);
 		close(fds[0]);
 	}
 	dup2(fds[1], STDOUT_FILENO);
 	close(fds[1]);
 	if (execve(ft_get_path(envp, cmd[0]), cmd, envp) < 0)
-	{
-		perror("Error\nexecuting command");
-		exit(1);
-	}
-	return (-1);
+		exit(errno);
+}
+
+int	ft_set_inputfd(int pipein, int pipeout)
+{
+	close(pipeout);
+	return (pipein);
 }
 
 int	ft_pipes(char *cmd, int fds[], char *envp[], int first_last[])
@@ -98,10 +83,9 @@ int	ft_pipes(char *cmd, int fds[], char *envp[], int first_last[])
 			ft_child_process(ft_split(cmd, ' '), fds, pipefd, envp);
 	}
 	if (!first_last[1])
-	{
-		close(pipefd[1]);
-		fds[0] = pipefd[0];
-	}
-	waitpid(pid, NULL, 0);
-	return (fds[0]);
+		fds[0] = ft_set_inputfd(pipefd[0], pipefd[1]);
+	waitpid(pid, &fds[2], 0);
+	if (WIFEXITED(fds[2]) && fds[2] != 0)
+		fds[2] = WEXITSTATUS(fds[2]);
+	return (fds[2]);
 }

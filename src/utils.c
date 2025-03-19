@@ -6,7 +6,7 @@
 /*   By: aehrl <aehrl@student.42malaga.com>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/11/20 17:05:05 by aehrl             #+#    #+#             */
-/*   Updated: 2025/02/25 18:33:24 by aehrl            ###   ########.fr       */
+/*   Updated: 2025/03/19 16:08:00 by aehrl            ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,15 +14,20 @@
 
 int	ft_access_rights(char *inputfile, char *outputfile)
 {
-	int	x;
+	int	i;
+	int	o;
 
-	x = access(outputfile, W_OK);
-	if (x < 0 && errno != 2)
-		return (perror("Output file error\nDescription"), -1);
-	x = access(inputfile, R_OK);
-	if (x < 0)
-		return (perror("Input file error\nDescription"), -1);
-	return (x);
+	i = access(inputfile, R_OK);
+	if (i < 0)
+		ft_err_msg(errno, NULL);
+	o = access(outputfile, W_OK);
+	if (o < 0 && (errno != 2 || ft_strlen(outputfile) == 0))
+		ft_err_msg(errno, NULL);
+	if (errno == 2 && ft_strlen(outputfile) > 0)
+		o = 0;
+	if (i < 0 || o < 0)
+		return (-1);
+	return (0);
 }
 
 void	free_matrix(char **envp)
@@ -30,6 +35,8 @@ void	free_matrix(char **envp)
 	int	i;
 
 	i = 0;
+	if (!envp)
+		return ;
 	while (envp[i])
 	{
 		free(envp[i]);
@@ -40,14 +47,16 @@ void	free_matrix(char **envp)
 
 char	**ft_get_environment(char **envp)
 {
-	int		i;
-	char	**newenvp;
+	int	i;
 
+	if (*envp == NULL)
+		return (ft_set_global_path());
 	i = 0;
-	while (!ft_strnstr(envp[i], "PATH=", 5))
+	while (envp[i] && !ft_strnstr(envp[i], "PATH=", 5))
 		i++;
+	if (envp[i] == NULL)
+		return (envp);
 	return (ft_split(envp[i] + 5, ':'));
-	return (newenvp);
 }
 
 char	*ft_get_path(char **envp, char *cmnd)
@@ -56,6 +65,10 @@ char	*ft_get_path(char **envp, char *cmnd)
 	char	*path;
 
 	i = 0;
+	if (!cmnd)
+		return (NULL);
+	if (ft_strrchr(cmnd, '/'))
+		return (cmnd);
 	while (envp[i])
 	{
 		path = ft_strjoin(ft_strjoin(envp[i], "/"), cmnd);
@@ -64,6 +77,12 @@ char	*ft_get_path(char **envp, char *cmnd)
 		free(path);
 		i++;
 	}
-	ft_putstr_fd("Error path not found\n", 1);
 	return (NULL);
+}
+
+void	ft_err_msg(int error, char **path)
+{
+	ft_putstr_fd(strerror(error), 2);
+	if (path)
+		free_matrix(path);
 }
